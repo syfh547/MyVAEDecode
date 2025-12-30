@@ -30,6 +30,14 @@ class IkarosVAEDecode:
         # 使用VAE的decode方法解码潜在空间
         decoded = vae.decode(samples["samples"])
         
+        # 确保输出格式正确：移除不必要的维度，并确保数据类型为float32
+        # 正确格式应该是(batch_size, height, width, channels)的f32格式
+        if len(decoded.shape) == 5:
+            decoded = decoded.squeeze(1)  # 移除中间的1维度
+        
+        # 确保数据类型正确
+        decoded = decoded.to(dtype=torch.float32)
+        
         # 返回解码后的图像
         return (decoded,)
 
