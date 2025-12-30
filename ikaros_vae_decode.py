@@ -46,8 +46,13 @@ class IkarosVAEDecode:
         decoded = decoded.to(dtype=torch.float32)
         
         # 3. 处理维度结构
-        if len(decoded.shape) == 4:
-            # 情况1: 4D张量
+        if len(decoded.shape) == 5:
+            # 情况1: 5D张量 (可能是视频序列: batch, frames, height, width, channels)
+            # 将frames维度合并到batch维度
+            batch_size, frames, height, width, channels = decoded.shape
+            decoded = decoded.view(batch_size * frames, height, width, channels)
+        elif len(decoded.shape) == 4:
+            # 情况2: 4D张量
             if decoded.shape[1] == 3:  # (batch, channels, height, width)
                 decoded = decoded.permute(0, 2, 3, 1)  # 转换为(batch, height, width, channels)
             elif decoded.shape[3] == 3:  # 已经是正确格式
